@@ -5,6 +5,33 @@ import argparse
 import utils.dslr_math as dmath
 
 
+def parse_arguments():
+    """Handle command line argument parsing"""
+
+    courses = [
+        'Arithmancy', 'Astronomy', 'Herbology',
+        'Defense Against the Dark Arts', 'Divination',
+        'Muggle Studies', 'Ancient Runes', 'History of Magic',
+        'Transfiguration', 'Potions', 'Care of Magical Creatures',
+        'Charms', 'Flying'
+    ]
+    parser = argparse.ArgumentParser(
+        description='Display histograms from dataset',
+        formatter_class=argparse.RawTextHelpFormatter
+    )
+    parser.add_argument('dataset', type=str,
+                        help='path to dataset CSV file')
+    parser.add_argument('-c', '--course', type=str,
+                        choices=courses,
+                        metavar='COURSE',
+                        help='show marks for specific course\n' +
+                        ', '.join(f'{c}' for c in courses))
+    args = parser.parse_args()
+
+    df = pandas.read_csv(args.dataset)
+    return df, args.course
+
+
 def histogram(ax, df, value_col, legend):
     """Plots histogram of given course grades. Also prints stats of
     said grades per house."""
@@ -31,33 +58,6 @@ def histogram(ax, df, value_col, legend):
     ax.set_xlabel('Grade')
     ax.set_title(value_col)
     ax.legend(legend, loc='upper right', frameon=False)
-
-
-def parse_arguments():
-    """Handle command line argument parsing"""
-
-    courses = [
-        'Arithmancy', 'Astronomy', 'Herbology',
-        'Defense Against the Dark Arts', 'Divination',
-        'Muggle Studies', 'Ancient Runes', 'History of Magic',
-        'Transfiguration', 'Potions', 'Care of Magical Creatures',
-        'Charms', 'Flying'
-    ]
-    parser = argparse.ArgumentParser(
-        description='Display histograms from dataset',
-        formatter_class=argparse.RawTextHelpFormatter
-    )
-    parser.add_argument('dataset', type=str,
-                        help='path to dataset CSV file')
-    parser.add_argument('-c', '--course', type=str,
-                        choices=courses,
-                        metavar='COURSE',
-                        help='show marks for specific course\n' +
-                        ', '.join(f'{c}' for c in courses))
-    args = parser.parse_args()
-
-    df = pandas.read_csv(args.dataset)
-    return df, args.course
 
 
 def main():
