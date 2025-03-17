@@ -2,105 +2,99 @@ import matplotlib.pyplot as plt
 import pandas
 import numpy as np
 import argparse
-from utils.clean_data import Data
-import csv
+import utils.dslr_math as dmath
 
 
-def plot_hist(ax: plt.Axes, df: pandas.DataFrame, house_name: str):
-    house = df[df["hogwarts_house"] == house_name]
-    print(house)
-    scores = house.loc[:, "arithmancy":"flying"]
-    norm = (scores - scores.min()) / (scores.max() - scores.min())
+def histogram(ax, df, value_col, legend):
+    """Plots histogram of given course grades. Also prints stats of
+    said grades per house."""
 
-    ax.hist(
-        norm.to_numpy().flatten(),
-        bins=40, rwidth=0.8,
-        stacked=True,
-        alpha=0.3,
-        label=house_name
-        )
-    ax.legend(["Gryffindor", "Ravenclaw", "Slytherin", "Hufflepuff"])
-    ax.set_title(house_name)
+    print(f"Stats for {value_col}:")
+    for house in legend:
+        house_scores = df[df["Hogwarts House"] == house][value_col].to_numpy()
+        house_scores = house_scores[~np.isnan(house_scores)]
+        ax.hist(
+            house_scores,
+            color=legend[house],
+            alpha=0.5,
+            stacked=True,
+            edgecolor='black',
+            label=house,
+            )
+        # Stats
+        if len(house_scores) > 0:
+            print(f"\t{house:10} | max: {dmath.max(house_scores):8.1f} "
+                  f"| min: {dmath.min(house_scores):8.1f} "
+                  f"| mean: {dmath.mean(house_scores):8.1f} "
+                  f"| std: {dmath.std(house_scores):8.1f}")
 
-
-def histogram(X, legend, title, xlabel, ylabel):
-    h1 = X[:327]
-    h1 = h1[~np.isnan(h1)]
-    plt.hist(h1, color='red', alpha=0.5, edgecolor='black')
-
-    h2 = X[327:856]
-    h2 = h2[~np.isnan(h2)]
-    plt.hist(h2, color='yellow', alpha=0.5, edgecolor='black')
-
-    h3 = X[856:1299]
-    h3 = h3[~np.isnan(h3)]
-    plt.hist(h3, color='blue', alpha=0.5, edgecolor='black')
-
-    h4 = X[1299:]
-    h4 = h4[~np.isnan(h4)]
-    plt.hist(h4, color='green', alpha=0.5, edgecolor='black')
-
-    plt.legend(legend, loc='upper right', frameon=False)
-    plt.title(title)
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.show()
+    ax.set_xlabel('Grade')
+    ax.set_title(value_col)
+    ax.legend(legend, loc='upper right', frameon=False)
 
 
-# def load_csv(filename):
-#     dataset = list()
-#     with open(filename) as csvfile:
-#         reader = csv.reader(csvfile)
-#         try:
-#             for _ in reader:
-#                 row = list()
-#                 for value in _:
-#                     try:
-#                         value = float(value)
-#                     except:
-#                         if not value:
-#                             value = np.nan
-#                     row.append(value)
-#                 dataset.append(row)
-#         except csv.Error as e:
-#             print(f'file {filename}, line {reader.line_num}: {e}')
-#     return np.array(dataset, dtype=object)
+def parse_arguments():
+    """Handle command line argument parsing"""
+
+    courses = [
+        'Arithmancy', 'Astronomy', 'Herbology',
+        'Defense Against the Dark Arts', 'Divination',
+        'Muggle Studies', 'Ancient Runes', 'History of Magic',
+        'Transfiguration', 'Potions', 'Care of Magical Creatures',
+        'Charms', 'Flying'
+    ]
+    parser = argparse.ArgumentParser(
+        description='Display histograms from dataset',
+        formatter_class=argparse.RawTextHelpFormatter
+    )
+    parser.add_argument('dataset', type=str,
+                        help='path to dataset CSV file')
+    parser.add_argument('-c', '--course', type=str,
+                        choices=courses,
+                        metavar='COURSE',
+                        help='show marks for specific course\n' +
+                        ', '.join(f'{c}' for c in courses))
+    args = parser.parse_args()
+
+    df = pandas.read_csv(args.dataset)
+    return df, args.course
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description='Display histograms from dataset'
-    )
-    parser.add_argument('dataset', type=str, help='path to dataset CSV file')
-    parser.add_argument('-c', '--compare', action='store_true',
-                        help='compare with pandas describe() output')
+    """Program to plot histograms of students' scores from given csv.
+    Care of Magical Creatures has the most uniform score distribution."""
 
-    # try:
-    args = parser.parse_args()
-    df = pandas.read_csv(args.dataset)
-    # dataset = Data(df)
-    
-    # fig, axs = plt.subplots()
-    # plot_hist(axs, dataset.df, "Gryffindor")
-    # plot_hist(axs, dataset.df, "Ravenclaw")
-    # plot_hist(axs, dataset.df, "Slytherin")
-    # plot_hist(axs, dataset.df, "Hufflepuff")
-    # plt.show()
+    try:
+        df, course = parse_arguments()
 
-    # df = load_csv(args.dataset)
+        data = df.to_numpy()
+        data = data[1:][data[1:, 1].argsort()]  # Sort by house column
 
-    data = df.to_numpy()[1:, :]
-    print(data)
-    data = data[data[:, 1].argsort()]
+        plt.figure(figsize=(20, 10))
+        legend = {'Gryffindor': 'red', 'Hufflepuff': 'yellow',
+                  'Ravenclaw': 'blue', 'Slytherin': 'green'}
+        course_scores = df.columns[6:]
 
-    X = np.array(data[:, 16], dtype=float)
-    legend = ['Grynffindor', 'Hufflepuff', 'Ravenclaw', 'Slytherin']
+        # Create histogram for single plot
+        if course:
+            ax = plt.subplot(111)
+            histogram(ax, df, course, legend)
+            ax.set_ylabel('Number of students')
+        # Plot histogram for every course
+        else:
+            for i, course in enumerate(course_scores):
+                ax = plt.subplot(3, 5, i + 1)
+                histogram(ax, df, course, legend)
 
-    histogram(X, legend=legend, title=data[0, 16], xlabel='Marks', ylabel='Number of student')
+                if i % 5 == 0:  # leftmost plots
+                    ax.set_ylabel('Number of students')
 
+        plt.tight_layout()
+        plt.show()
 
-    # except Exception as e:
-    #     print(f"{Exception.__name__}: {e}")
+    except Exception as e:
+        print(f"{type(e).__name__}: {e}")
+
 
 if __name__ == "__main__":
     main()
