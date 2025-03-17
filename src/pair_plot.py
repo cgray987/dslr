@@ -3,12 +3,13 @@ import pandas
 import numpy as np
 import argparse
 import histogram as h
+import scatter_plot as s
 
 
 def parse_arguments():
     """Handle command line argument parsing"""
     parser = argparse.ArgumentParser(
-        description='Display scatter plots comparing course scores',
+        description='Display a grid of pair plots comparing course scores',
         formatter_class=argparse.RawTextHelpFormatter
     )
     parser.add_argument('dataset', type=str,
@@ -17,26 +18,6 @@ def parse_arguments():
 
     df = pandas.read_csv(args.dataset)
     return df
-
-
-def scatter(ax, df, x_col, y_col, legend):
-    """Creates scatter plot comparing two course scores, colored by house"""
-
-    for house, color in legend.items():
-        mask = df["Hogwarts House"] == house
-        x_scores = df[mask][x_col].to_numpy()
-        y_scores = df[mask][y_col].to_numpy()
-        # Remove rows where either score is NaN
-        valid = ~(np.isnan(x_scores) | np.isnan(y_scores))
-        ax.scatter(x_scores[valid],
-                   y_scores[valid],
-                   color=color,
-                   alpha=0.5,
-                   s=0.5)
-
-    plt.xticks([], [])
-    plt.yticks([], [])
-
 
 def main():
     """Program to plot scatter plots of students' scores from given csv.
@@ -69,8 +50,8 @@ def main():
                 plt.xticks([], [])
                 plt.yticks([], [])
             else:
-                scatter(ax, df, course_scores[i],
-                        course_scores[j], legend)
+                s.scatter(ax, df, course_scores[i],
+                          course_scores[j], legend)
 
             if i == n_courses - 1:  # bottom row
                 ax.set_xlabel(course_scores[j][:15])
