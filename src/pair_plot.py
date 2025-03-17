@@ -31,7 +31,8 @@ def scatter(ax, df, x_col, y_col, legend):
         ax.scatter(x_scores[valid],
                    y_scores[valid],
                    color=color,
-                   alpha=0.5)
+                   alpha=0.5,
+                   s=0.5)
 
     plt.xticks([], [])
     plt.yticks([], [])
@@ -64,16 +65,17 @@ def main():
                 ax.set_xlabel("")
                 ax.set_ylabel("")
                 ax.get_legend().remove()
+                ax.set_title("")
                 plt.xticks([], [])
                 plt.yticks([], [])
             else:
                 scatter(ax, df, course_scores[i],
                         course_scores[j], legend)
 
-                if i == n_courses - 1:  # bottom row
-                    ax.set_xlabel(course_scores[j][:15])
-                else:
-                    ax.set_xlabel('')
+            if i == n_courses - 1:  # bottom row
+                ax.set_xlabel(course_scores[j][:15])
+            else:
+                ax.set_xlabel('')
             if j == 0:  # leftmost column
                 ax.set_ylabel(course_scores[i][:10], fontsize=8)
             else:

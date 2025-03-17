@@ -40,7 +40,8 @@ def scatter(ax, df, x_col, y_col, legend):
         ax.scatter(x_scores[valid],
                    y_scores[valid],
                    color=color,
-                   alpha=0.5)
+                   alpha=0.5,
+                   s=0.5)
 
     plt.xticks([], [])
     plt.yticks([], [])
