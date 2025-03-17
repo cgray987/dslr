@@ -32,11 +32,11 @@ def parse_arguments():
     return df, args.course
 
 
-def histogram(ax, df, value_col, legend):
+def histogram(ax, df, value_col, legend, stats=False):
     """Plots histogram of given course grades. Also prints stats of
     said grades per house."""
 
-    print(f"Stats for {value_col}:")
+    if stats: print(f"Stats for {value_col}:")
     for house in legend:
         house_scores = df[df["Hogwarts House"] == house][value_col].to_numpy()
         house_scores = house_scores[~np.isnan(house_scores)]
@@ -49,7 +49,7 @@ def histogram(ax, df, value_col, legend):
             label=house,
             )
         # Stats
-        if len(house_scores) > 0:
+        if len(house_scores) > 0 and stats:
             print(f"\t{house:10} | max: {dmath.max(house_scores):8.1f} "
                   f"| min: {dmath.min(house_scores):8.1f} "
                   f"| mean: {dmath.mean(house_scores):8.1f} "
@@ -78,13 +78,13 @@ def main():
         # Create histogram for single plot
         if course:
             ax = plt.subplot(111)
-            histogram(ax, df, course, legend)
+            histogram(ax, df, course, legend, True)
             ax.set_ylabel('Number of students')
         # Plot histogram for every course
         else:
             for i, course in enumerate(course_scores):
                 ax = plt.subplot(3, 5, i + 1)
-                histogram(ax, df, course, legend)
+                histogram(ax, df, course, legend, True)
 
                 if i % 5 == 0:  # leftmost plots
                     ax.set_ylabel('Number of students')
