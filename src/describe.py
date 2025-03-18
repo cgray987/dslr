@@ -8,11 +8,11 @@ def describe(df):
     """Prints table of statistical calculations on given dataframe"""
     numeric_df = df.select_dtypes(include=[np.number])
 
-    print(f"{'':6}", end=" ")
+    print(f"{'':5}", end=" ")
     for col in numeric_df.columns:
-        print(f"| {col[0:12]:^12}", end=" ")
+        print(f"|{col[0:12]:^12}", end=" ")
     # width of row above
-    width = 6 + sum(1 + 2 + 12 for _ in numeric_df.columns)
+    width = 5 + sum(2 + 12 for _ in numeric_df.columns)
     print()
     print("-" * width)
 
@@ -27,14 +27,11 @@ def describe(df):
         'Max': lambda x: dslr_math.max(x)
     }
     for stat_name, stat_func in stats.items():
-        print(f"{stat_name:6}", end=" ")
+        print(f"{stat_name:5}", end=" ")
         for col in numeric_df.columns:
-            try:
-                data = numeric_df[col]
-                val = stat_func(data)
-                print(f"| {val:12.4f}", end=" ")
-            except Exception:
-                print(f"| {'NaN':12}", end=" ")
+            data = numeric_df[col]
+            val = stat_func(data)
+            print(f"|{val:12.4f}", end=" ")
         print()
 
 
