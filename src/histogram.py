@@ -36,7 +36,8 @@ def histogram(ax, df, value_col, legend, stats=False):
     """Plots histogram of given course grades. Also prints stats of
     said grades per house."""
 
-    if stats: print(f"Stats for {value_col}:")
+    if stats:
+        print(f"Stats for {value_col}:")
     for house in legend:
         house_scores = df[df["Hogwarts House"] == house][value_col].to_numpy()
         house_scores = house_scores[~np.isnan(house_scores)]
@@ -66,9 +67,6 @@ def main():
 
     try:
         df, course = parse_arguments()
-
-        data = df.to_numpy()
-        data = data[1:][data[1:, 1].argsort()]  # Sort by house column
 
         plt.figure(figsize=(20, 10))
         legend = {'Gryffindor': 'red', 'Hufflepuff': 'yellow',
