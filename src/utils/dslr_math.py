@@ -56,6 +56,7 @@ def max(arr):
 
 def quantile(arr, p):
     """returns the 'Pth' percentile for given array-like"""
+    arr = arr[~np.isnan(arr)]  # Remove NaN values
     arr = sorted(arr)
     position = (len(arr) - 1) * (p / 100)
     lower = int(np.floor(position))
@@ -65,4 +66,5 @@ def quantile(arr, p):
     if lower == higher:
         return arr[lower]
     fraction = position - lower
-    return arr[lower] * (1 - fraction) + arr[higher] * fraction
+    ret = arr[lower] * (1 - fraction) + arr[higher] * fraction
+    return ret
