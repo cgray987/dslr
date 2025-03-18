@@ -28,7 +28,7 @@ def parse_arguments():
     return df, args.courses
 
 
-def scatter(ax, df, x_col, y_col, legend):
+def scatter(ax, df, x_col, y_col, legend, scatter_size=0.5):
     """Creates scatter plot comparing two course scores, colored by house"""
 
     for house, color in legend.items():
@@ -41,7 +41,7 @@ def scatter(ax, df, x_col, y_col, legend):
                    y_scores[valid],
                    color=color,
                    alpha=0.5,
-                   s=0.5)
+                   s=scatter_size)
 
     plt.xticks([], [])
     plt.yticks([], [])
@@ -65,7 +65,8 @@ def main():
             # Single scatter plot comparing two specified courses
             fig = plt.figure(figsize=(20, 20))
             ax = plt.subplot(111)
-            scatter(ax, df, selected_courses[0], selected_courses[1], legend)
+            scatter(ax, df, selected_courses[0],
+                    selected_courses[1], legend, scatter_size=100)
             ax.set_xlabel(selected_courses[0])
             ax.set_ylabel(selected_courses[1])
         else:
