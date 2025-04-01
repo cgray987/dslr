@@ -4,7 +4,6 @@ import pandas
 from sklearn.linear_model import LogisticRegression
 import utils.dslr_math as dslr
 from sklearn.metrics import accuracy_score
-# from sklearn.model_selection import train_test_split
 
 
 def fitter(X):
@@ -76,8 +75,7 @@ def main():
                 print(f"{i},{house}")
                 file.write(f"{i},{house}\n")
         truth = pandas.read_csv('datasets/dataset_truth.csv')
-        predict = pandas.read_csv('datasets/predictions.csv')
-        print(f"accuracy score: {accuracy_score(truth, predict, normalize=False)}")
+        print(f"accuracy score: {accuracy_score(truth['Hogwarts House'], predicted_house)}")
 
     # print("Before scaling:")
     # print(f"Mean: {dslr.mean(x.values.flatten()):.6f}")
