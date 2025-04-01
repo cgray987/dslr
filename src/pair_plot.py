@@ -36,32 +36,36 @@ def main():
 
         # Grid of scatter plots comparing each course with others
         fig, axes = plt.subplots(n_courses, n_courses, figsize=(20, 20))
-        plt.subplots_adjust(wspace=0.3, hspace=0.3)
+        plt.subplots_adjust(wspace=0.15, hspace=0.15)
         for row in range(n_courses):
             for col in range(n_courses):
                 plot_num = row * n_courses + col + 1
                 ax = plt.subplot(n_courses, n_courses, plot_num)
+                plt.yticks(fontsize=6)
+                plt.xticks(fontsize=6)
                 if row == col:
                     h.histogram(ax, df, course_scores[row], legend)
                     ax.set_xlabel("")
                     ax.set_ylabel("")
                     ax.get_legend().remove()
                     ax.set_title("")
-                    plt.xticks([], [])
-                    plt.yticks([], [])
                 else:
                     s.scatter(ax, df, course_scores[row],
                               course_scores[col], legend)
 
                 if row == n_courses - 1:  # bottom row
-                    ax.set_xlabel(course_scores[col][:15])
+                    ax.set_xlabel(course_scores[col][:15].replace(" ", "\n"),
+                                  fontsize=6)
                 else:
                     ax.set_xlabel('')
+                    plt.xticks([], [])
                 if col == 0:  # leftmost column
-                    ax.set_ylabel(course_scores[row][:10], fontsize=8)
+                    ax.set_ylabel(course_scores[row][:15].replace(" ", "\n"),
+                                  fontsize=6)
                 else:
                     ax.set_ylabel('')
-
+                    plt.yticks([], [])
+        fig.legend(legend, loc='lower right')
         plt.tight_layout()
         plt.show()
 

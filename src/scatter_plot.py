@@ -43,9 +43,6 @@ def scatter(ax, df, x_col, y_col, legend, scatter_size=0.5):
                    alpha=0.5,
                    s=scatter_size)
 
-    plt.xticks([], [])
-    plt.yticks([], [])
-
 
 def main():
     """Program to plot scatter plots of students' scores from given csv.
@@ -73,24 +70,26 @@ def main():
             # Grid of scatter plots comparing each course with others
             fig, axes = plt.subplots(n_courses, n_courses, figsize=(20, 20))
             plt.subplots_adjust(wspace=0.3, hspace=0.3)
-            for i in range(n_courses):
-                for j in range(n_courses):
-                    if j < i:
-                        plot_num = i * n_courses + j + 1
+            for row in range(n_courses):
+                for col in range(n_courses):
+                    if col < row:
+                        plot_num = row * n_courses + col + 1
                         ax = plt.subplot(n_courses, n_courses, plot_num)
-                        scatter(ax, df, course_scores[i],
-                                course_scores[j], legend)
+                        scatter(ax, df, course_scores[row],
+                                course_scores[col], legend)
 
-                        if i == n_courses - 1:  # bottom row
-                            ax.set_xlabel(course_scores[j][:15])
+                        if row == n_courses - 1:  # bottom row
+                            ax.set_xlabel(course_scores[col][:15])
                         else:
                             ax.set_xlabel('')
-                        if j == 0:  # leftmost column
-                            ax.set_ylabel(course_scores[i][:10], fontsize=8)
+                        if col == 0:  # leftmost column
+                            ax.set_ylabel(course_scores[row][:10], fontsize=8)
                         else:
                             ax.set_ylabel('')
                     else:
-                        axes[i, j].set_visible(False)
+                        axes[row, col].set_visible(False)
+                    plt.xticks([], [])
+                    plt.yticks([], [])
 
         plt.tight_layout()
         plt.show()
