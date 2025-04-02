@@ -42,15 +42,13 @@ def parse_args():
 
 
 def main():
-    """Create predicted weights to classify students scores into
-    appropriate houses"""
-    try:
+    # try:
         df = parse_args()
 
         x = df.select_dtypes(include=[np.number]).iloc[:, 1:]
         y = df['Hogwarts House']
  
-        x = x.fillna(x.mean())
+        x = x.fillna(dslr.mean(x))
         x_scaled = fitter(x)
 
         model = LogisticRegression(solver='liblinear', random_state=0)
@@ -84,8 +82,8 @@ def main():
     # print("\nAfter scaling:")
     # print(f"Mean: {dslr.mean(x_scaled.flatten()):.10f}")
     # print(f"Std: {dslr.std(x_scaled.flatten()):.10f}")
-    except Exception as e:
-        print(f"{type(e).__name__}: {e}")
+    # except Exception as e:
+    #     print(f"{type(e).__name__}: {e}")
 
 
 if __name__ == "__main__":

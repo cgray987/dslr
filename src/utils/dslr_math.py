@@ -22,6 +22,9 @@ def sum(arr):
 
 def mean(arr):
     """mean (avg) of given array-like"""
+    n = count(arr)
+    if n == 0:
+        return np.nan
     return sum(arr) / len(arr)
 
 
