@@ -31,6 +31,8 @@ def mean(arr):
 def variance(arr):
     """variance of given array-like"""
     avg = mean(arr)
+    if (len(arr) == 0):
+        return 0
     return sum([(x - avg) ** 2 for x in arr]) / len(arr)
 
 
