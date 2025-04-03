@@ -1,7 +1,7 @@
 import argparse
 import numpy as np
 import pandas
-import utils.dslr_math as dslr
+import utils.log_reg as log_reg
 
 
 def parse_args():
@@ -19,34 +19,7 @@ def parse_args():
     return df
 
 
-def fitter(X):
-    """Scales columns to unit variance
-    mean becomes = 0, variance becomes = 1"""
-    X = np.array(X)
-    n_features = X.shape[1]
-    fitted = np.zeros_like(X)
-
-    for i in range(n_features):
-        col = X[:, i]
-        mean = dslr.mean(col[~np.isnan(col)])
-        std = dslr.std(col[~np.isnan(col)])
-
-        if std == 0:
-            fitted[:, i] = 0
-        else:
-            fitted[:, i] = (col - mean) / std
-
-    return fitted
-
-
-def sigmoid(guess):
-    """returns probability (array) between 0-1 using 
-    sigmoid function"""
-    guess = np.clip(guess, -100, 100)
-    return (1 / (1 + np.exp(-guess)))
-
-
-def one_vs_all(x: np.array, y: np.array):
+def one_vs_all(x, y):
     """ create weights for probability that student will be sorted
     into one house, vs being sorted into any of the others """
     n_iterations = 100
@@ -57,13 +30,12 @@ def one_vs_all(x: np.array, y: np.array):
     n_houses = len(houses)
 
     weights = np.zeros((n_houses, n_classes))
-    bias = np.zeros_like(y)
+    bias = np.zeros(n_houses)
 
     for i_x, current_house in enumerate(houses):
-        # hufflepuff: [1, 0, 0, 0] etc
-        np.where(current_house == y, 0, 1)
+        # hufflepuff: [0, 1, 0, 0] etc
         y_bin = np.array([1 if label == current_house
-                          else 0 for label in y])
+                          else 0 for label in y])  # [G, H, R, S]
 
         weights_per_class = np.zeros(n_classes)
         bias_per_class = 0
@@ -72,8 +44,8 @@ def one_vs_all(x: np.array, y: np.array):
         for _ in range(n_iterations):
             # guess = weights*data + bias
             guess = np.dot(x, weights_per_class) + bias_per_class
-            prob = sigmoid(guess)
-            
+            prob = log_reg.sigmoid(guess)
+
             error = prob - y_bin
             weight_grad = (1 / n_values) * np.dot(x.T, error)
             bias_grad = (1 / n_values) * np.sum(error)
@@ -89,17 +61,16 @@ def one_vs_all(x: np.array, y: np.array):
 def main():
     df = parse_args()
 
-    x = df.select_dtypes(include=[np.number]).iloc[:, 1:]
+    x = df.iloc[:, 6:]
     y = df['Hogwarts House'].to_numpy()
 
-    x = x.fillna(x.mean()).to_numpy()  # fill nan values with mean of dataset, possibly should be mean of column
-    x = fitter(x)  # standard scaling -- all values normed to 0-1
+    # fill nan values with mean of dataset, possibly should be mean of column
+    x = x.fillna(x.mean()).to_numpy()
+    x = log_reg.fitter(x)  # standard scaling -- all values normed to 0-1
 
     weights, bias = one_vs_all(x, y)
-    with open('datasets/weights2.csv', 'w', ) as file:
-        np.savetxt(file, weights)
-
-
+    with open('datasets/weights.csv', 'w', ) as file:
+        np.savetxt(file, weights, delimiter=' ', fmt="%1.9f")
 
 
 if __name__ == "__main__":
