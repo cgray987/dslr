@@ -2,6 +2,9 @@ import argparse
 import numpy as np
 import pandas
 import utils.log_reg as log_reg
+from utils.colors import c
+from logreg_predict import predict  # only for confusion matrix
+from utils.plotting import plot_confusion_matrix
 
 
 def parse_args():
@@ -13,10 +16,30 @@ def parse_args():
     )
     parser.add_argument('dataset', type=str,
                         help='path to training dataset CSV file')
+    parser.add_argument('-c', '--confusion', action='store_true',
+                        help='display a confusion matrix from test data')
     args = parser.parse_args()
 
     df = pandas.read_csv(args.dataset)
-    return df
+    return df, args
+
+
+def show_confusion(x, y, weights):
+    houses = np.array(['Gryffindor', 'Hufflepuff',
+                       'Ravenclaw', 'Slytherin'])
+    bin_predictions = predict(x, weights)
+    predictions = houses[bin_predictions]
+    conf_matrix = pandas.crosstab(
+        predictions,  # rows (predicted)
+        y,           # columns (actual)
+        rownames=['Predicted'],
+        colnames=['Actual']
+    )
+    print(f"\n{c.BOLD}Confusion Matrix: {c.RST}")
+    print(conf_matrix)
+    accuracy = np.sum(predictions == y) / len(y) * 100
+    print(f"\nAccuracy: {accuracy:.3f}%")
+    plot_confusion_matrix(conf_matrix)
 
 
 def one_vs_all(x, y):
@@ -59,18 +82,25 @@ def one_vs_all(x, y):
 
 
 def main():
-    df = parse_args()
+    df, args = parse_args()
 
-    x = df.iloc[:, 6:]
-    y = df['Hogwarts House'].to_numpy()
+    try:
+        x = df.iloc[:, 6:]
+        y = df['Hogwarts House'].to_numpy()
 
-    # fill nan values with mean of dataset, possibly should be mean of column
-    x = x.fillna(x.mean()).to_numpy()
-    x = log_reg.fitter(x)  # standard scaling -- all values normed to 0-1
+        # fill nan values with mean of dataset, maybe should be mean of column
+        x = x.fillna(x.mean()).to_numpy()
+        x = log_reg.fitter(x)  # standard scaling -- all values normed to 0-1
 
-    weights, bias = one_vs_all(x, y)
-    with open('datasets/weights.csv', 'w', ) as file:
-        np.savetxt(file, weights, delimiter=' ', fmt="%1.9f")
+        weights, bias = one_vs_all(x, y)
+        with open('datasets/weights.csv', 'w', ) as file:
+            np.savetxt(file, weights, delimiter=' ', fmt="%1.9f")
+        print(f"Training weights written to {c.BOLD}{file.name}{c.RST}.")
+
+        if args.confusion:
+            show_confusion(x, y, weights)
+    except Exception as e:
+        print(f"{type(e).__name__}: {e}")
 
 
 if __name__ == "__main__":

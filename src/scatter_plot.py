@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import pandas
 import numpy as np
 import argparse
+from utils.plotting import scatter
 
 
 def parse_arguments():
@@ -26,22 +27,6 @@ def parse_arguments():
 
     df = pandas.read_csv(args.dataset)
     return df, args.courses
-
-
-def scatter(ax, df, x_col, y_col, legend, scatter_size=0.5):
-    """Creates scatter plot comparing two course scores, colored by house"""
-
-    for house, color in legend.items():
-        mask = df["Hogwarts House"] == house
-        x_scores = df[mask][x_col].to_numpy()
-        y_scores = df[mask][y_col].to_numpy()
-        # Remove rows where either score is NaN
-        valid = ~(np.isnan(x_scores) | np.isnan(y_scores))
-        ax.scatter(x_scores[valid],
-                   y_scores[valid],
-                   color=color,
-                   alpha=0.5,
-                   s=scatter_size)
 
 
 def main():
@@ -91,7 +76,7 @@ def main():
                     plt.xticks([], [])
                     plt.yticks([], [])
 
-        plt.tight_layout()
+            plt.tight_layout()
         plt.show()
 
     except Exception as e:

@@ -2,6 +2,8 @@ import argparse
 import numpy as np
 import pandas
 import utils.log_reg as log_reg
+from utils.colors import c
+# from sklearn.metrics import accuracy_score
 
 
 def parse_args():
@@ -15,6 +17,7 @@ def parse_args():
                         help='path to test dataset CSV file')
     parser.add_argument('weights', type=str,
                         help='path to training weights file')
+
     args = parser.parse_args()
 
     df = pandas.read_csv(args.dataset)
@@ -33,24 +36,30 @@ def predict(x, weights):
 def main():
     test_df, args = parse_args()
 
-    x_test = test_df.iloc[:, 6:]
-    x_test = x_test.fillna(x_test.mean()).to_numpy()
-    x_test = log_reg.fitter(x_test)
+    try:
+        x_test = test_df.iloc[:, 6:]
+        x_test = x_test.fillna(x_test.mean()).to_numpy()
+        x_test = log_reg.fitter(x_test)
 
-    weights = np.loadtxt(args.weights)
-    # print(weights)
+        weights = np.loadtxt(args.weights)
 
-    # print(x_test.shape)
-    # print(weights.shape)
-    house_index = predict(x_test, weights)
-    houses = ['Gryffindor', 'Hufflepuff', 'Ravenclaw', 'Slytherin']
-    predictions = [houses[i] for i in house_index]
+        houses = ['Gryffindor', 'Hufflepuff',
+                  'Ravenclaw', 'Slytherin']
+        house_index = predict(x_test, weights)
+        predictions = [houses[i] for i in house_index]
 
-    with open('datasets/houses.csv', 'w') as file:
-        file.write("Index,Hogwarts House\n")
-        for i, house in enumerate(predictions):
-            file.write(f"{i},{house}\n")
-            # print(f"{i},{house}")
+        with open('datasets/houses.csv', 'w') as file:
+            file.write("Index,Hogwarts House\n")
+            for i, house in enumerate(predictions):
+                file.write(f"{i},{house}\n")
+        print(f"House predictions written to {c.BOLD}{file.name}{c.RST}.")
+
+        # truth = pandas.read_csv('datasets/dataset_truth.csv')
+        # accuracy = accuracy_score(truth['Hogwarts House'], predictions)
+        # print(f"accuracy score: {accuracy}")
+
+    except Exception as e:
+        print(f"{type(e).__name__}: {e}")
 
 
 if __name__ == "__main__":

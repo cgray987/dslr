@@ -1,6 +1,7 @@
 import pandas
 import numpy as np
 import utils.dslr_math as dslr_math
+from utils.colors import c
 import argparse
 
 
@@ -10,7 +11,7 @@ def describe(df):
 
     print(f"{'':5}", end=" ")
     for col in numeric_df.columns:
-        print(f"|{col[0:12]:^12}", end=" ")
+        print(f"|{c.BOLD}{col[0:12]:^12}{c.RST}", end=" ")
     # width of row above
     width = 5 + sum(2 + 12 for _ in numeric_df.columns)
     print()
@@ -27,11 +28,11 @@ def describe(df):
         'Max': lambda x: dslr_math.max(x)
     }
     for stat_name, stat_func in stats.items():
-        print(f"{stat_name:5}", end=" ")
+        print(f"{c.BOLD}{stat_name:5}{c.RST}", end=" ")
         for col in numeric_df.columns:
             data = numeric_df[col]
             val = stat_func(data)
-            print(f"|{val:12.4f}", end=" ")
+            print(f"|{val:12.2f}", end=" ")
         print()
 
 

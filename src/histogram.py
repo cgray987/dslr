@@ -1,8 +1,7 @@
 import matplotlib.pyplot as plt
 import pandas
-import numpy as np
 import argparse
-import utils.dslr_math as dmath
+from utils.plotting import histogram
 
 
 def parse_arguments():
@@ -30,35 +29,6 @@ def parse_arguments():
 
     df = pandas.read_csv(args.dataset)
     return df, args.course
-
-
-def histogram(ax, df, value_col, legend, stats=False):
-    """Plots histogram of given course grades. Also prints stats of
-    said grades per house."""
-
-    if stats:
-        print(f"Stats for {value_col}:")
-    for house in legend:
-        house_scores = df[df["Hogwarts House"] == house][value_col].to_numpy()
-        house_scores = house_scores[~np.isnan(house_scores)]
-        ax.hist(
-            house_scores,
-            color=legend[house],
-            alpha=0.5,
-            stacked=True,
-            edgecolor='black',
-            label=house,
-            )
-        # Stats
-        if len(house_scores) > 0 and stats:
-            print(f"\t{house:10} | max: {dmath.max(house_scores):8.1f} "
-                  f"| min: {dmath.min(house_scores):8.1f} "
-                  f"| mean: {dmath.mean(house_scores):8.1f} "
-                  f"| std: {dmath.std(house_scores):8.1f}")
-
-    ax.set_xlabel('Grade')
-    ax.set_title(value_col)
-    ax.legend(legend, loc='upper right', frameon=False)
 
 
 def main():
