@@ -55,10 +55,8 @@ def main():
 
         truth = pandas.read_csv('datasets/dataset_truth.csv')
         truth = truth['Hogwarts House'].to_numpy()
-        compare_array = np.array(truth == predictions)
-        accuracy = np.mean(compare_array)
-
-        print(f"accuracy score: {accuracy}")
+        accuracy = np.sum(predictions == truth) / len(predictions) * 100
+        print(f"\nAccuracy: {accuracy:.3f}%")
 
     except Exception as e:
         print(f"{type(e).__name__}: {e}")

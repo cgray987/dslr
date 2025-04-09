@@ -27,10 +27,10 @@ def parse_args():
     return df, args
 
 
-def show_confusion(x, y, weights):
+def show_confusion(x, y, weights, bias):
     houses = np.array(['Gryffindor', 'Hufflepuff',
                        'Ravenclaw', 'Slytherin'])
-    bin_predictions = predict(x, weights)
+    bin_predictions = predict(x, weights, bias)
     predictions = houses[bin_predictions]
     conf_matrix = pandas.crosstab(
         predictions,  # rows (predicted)
@@ -100,13 +100,12 @@ def one_vs_all(x, y, n_iterations=100, learning_rate=0.1, stochastic=False):
         weights_per_class = np.zeros(n_classes)
         bias_per_class = 0
 
+        print(f"{c.BOLD}{current_house}{c.RST}")
         if stochastic:
-            print(f"{current_house}")
             w, b = stochastic_gd(x, y_bin, learning_rate)
             weights[i_x] = w
             bias[i_x] = b
         else:
-            print(f"{current_house}")
             # gradient descent (minimize error)
             for i in range(n_iterations):
                 # guess = weights*data + bias
@@ -147,7 +146,7 @@ def main():
         print(f"Training weights written to {c.BOLD}{file.name}{c.RST}.")
 
         if args.confusion:
-            show_confusion(x, y, weights)
+            show_confusion(x, y, weights, bias)
     except Exception as e:
         print(f"{type(e).__name__}: {e}")
 
