@@ -45,7 +45,7 @@ def show_confusion(x, y, weights):
     plot_confusion_matrix(conf_matrix)
 
 
-def stochastic_gd(x, y, learning_rate=3, epochs=1, batches=1):
+def stochastic_gd(x, y, learning_rate=.1, epochs=25, batches=1):
     """Uses batches (epochs) to determine weights and bias"""
     n_values, n_features = x.shape
     weights = np.random.randn(n_features) * 0.01  # start with random weights
@@ -76,8 +76,8 @@ def stochastic_gd(x, y, learning_rate=3, epochs=1, batches=1):
             loss = -np.mean(y_s * np.log(pred_s + 1e-15) +
                             (1-y_s) * np.log(1 - pred_s + 1e-15))
             epoch_loss += loss
-        if epoch % 25 == 0:
-            print(f"Epoch {epoch}, Loss: {epoch_loss:.4f}")
+        if epoch % 10 == 0:
+            print(f"\tEpoch {epoch}, Loss: {epoch_loss:.4f}")
 
     return weights, bias
 
@@ -101,12 +101,14 @@ def one_vs_all(x, y, n_iterations=100, learning_rate=0.1, stochastic=False):
         bias_per_class = 0
 
         if stochastic:
+            print(f"{current_house}")
             w, b = stochastic_gd(x, y_bin, learning_rate)
             weights[i_x] = w
             bias[i_x] = b
         else:
+            print(f"{current_house}")
             # gradient descent (minimize error)
-            for _ in range(n_iterations):
+            for i in range(n_iterations):
                 # guess = weights*data + bias
                 guess = np.dot(x, weights_per_class) + bias_per_class
                 prob = log_reg.sigmoid(guess)
@@ -117,6 +119,8 @@ def one_vs_all(x, y, n_iterations=100, learning_rate=0.1, stochastic=False):
 
                 weights_per_class -= learning_rate * weight_grad
                 bias_per_class -= learning_rate * bias_grad
+                if i % 10 == 0:
+                    print(f"\tIteration {i}, Error: {sum(error):.4f}")
 
             weights[i_x] = weights_per_class
             bias[i_x] = bias_per_class
@@ -136,7 +140,10 @@ def main():
 
         weights, bias = one_vs_all(x, y, stochastic=args.stochastic)
         with open('datasets/weights.csv', 'w', ) as file:
-            np.savetxt(file, weights, delimiter=' ', fmt="%1.9f")
+            np.savetxt(file, weights, delimiter=' ',
+                       fmt="%1.9f", header='weights')
+            np.savetxt(file, bias, delimiter=' ',
+                       fmt="%1.9f", header='bias')
         print(f"Training weights written to {c.BOLD}{file.name}{c.RST}.")
 
         if args.confusion:

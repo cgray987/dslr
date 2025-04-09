@@ -3,7 +3,6 @@ import numpy as np
 import pandas
 import utils.log_reg as log_reg
 from utils.colors import c
-# from sklearn.metrics import accuracy_score
 
 
 def parse_args():
@@ -24,11 +23,10 @@ def parse_args():
     return df, args
 
 
-def predict(x, weights):
+def predict(x, weights, bias):
     """ multiplies features and training weights, converts to probabilities
      and returns array of max probability for each row """
-    # z = np.dot(x, weights.T) + bias[np.newaxis, :]
-    z = np.dot(x, weights.T)
+    z = np.dot(x, weights.T) + bias[np.newaxis, :]
     prob = log_reg.sigmoid(z)
     return (np.argmax(prob, axis=1))
 
@@ -41,11 +39,12 @@ def main():
         x_test = x_test.fillna(x_test.mean()).to_numpy()
         x_test = log_reg.fitter(x_test)
 
-        weights = np.loadtxt(args.weights)
+        weights = np.loadtxt(args.weights, skiprows=1, max_rows=4)
+        bias = np.loadtxt(args.weights, skiprows=6)
 
         houses = ['Gryffindor', 'Hufflepuff',
                   'Ravenclaw', 'Slytherin']
-        house_index = predict(x_test, weights)
+        house_index = predict(x_test, weights, bias)
         predictions = [houses[i] for i in house_index]
 
         with open('datasets/houses.csv', 'w') as file:
@@ -54,9 +53,12 @@ def main():
                 file.write(f"{i},{house}\n")
         print(f"House predictions written to {c.BOLD}{file.name}{c.RST}.")
 
-        # truth = pandas.read_csv('datasets/dataset_truth.csv')
-        # accuracy = accuracy_score(truth['Hogwarts House'], predictions)
-        # print(f"accuracy score: {accuracy}")
+        truth = pandas.read_csv('datasets/dataset_truth.csv')
+        truth = truth['Hogwarts House'].to_numpy()
+        compare_array = np.array(truth == predictions)
+        accuracy = np.mean(compare_array)
+
+        print(f"accuracy score: {accuracy}")
 
     except Exception as e:
         print(f"{type(e).__name__}: {e}")
