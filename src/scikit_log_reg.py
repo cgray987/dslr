@@ -22,7 +22,6 @@ def fitter(X):
             fitted[:, i] = 0
         else:
             fitted[:, i] = (col - mean) / std
-    
     return fitted
 
 
@@ -42,12 +41,12 @@ def parse_args():
 
 
 def main():
-    # try:
+    try:
         df = parse_args()
 
         x = df.select_dtypes(include=[np.number]).iloc[:, 1:]
         y = df['Hogwarts House']
- 
+
         x = x.fillna(dslr.mean(x))
         x_scaled = fitter(x)
 
@@ -73,7 +72,8 @@ def main():
                 print(f"{i},{house}")
                 file.write(f"{i},{house}\n")
         truth = pandas.read_csv('datasets/dataset_truth.csv')
-        print(f"accuracy score: {accuracy_score(truth['Hogwarts House'], predicted_house)}")
+        score = accuracy_score(truth['Hogwarts House'], predicted_house)
+        print(f"accuracy score: {score}")
 
     # print("Before scaling:")
     # print(f"Mean: {dslr.mean(x.values.flatten()):.6f}")
@@ -82,8 +82,8 @@ def main():
     # print("\nAfter scaling:")
     # print(f"Mean: {dslr.mean(x_scaled.flatten()):.10f}")
     # print(f"Std: {dslr.std(x_scaled.flatten()):.10f}")
-    # except Exception as e:
-    #     print(f"{type(e).__name__}: {e}")
+    except Exception as e:
+        print(f"{type(e).__name__}: {e}")
 
 
 if __name__ == "__main__":

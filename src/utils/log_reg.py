@@ -2,23 +2,19 @@ import numpy as np
 import utils.dslr_math as dslr
 
 
-def fitter(X):
+def fitter(features):
     """Scales columns to unit variance
     mean becomes = 0, variance becomes = 1"""
-    X = np.array(X)
-    n_features = X.shape[1]
-    fitted = np.zeros_like(X)
-
+    n_features = features.shape[1]  # 13
+    fitted = np.zeros_like(features)  # output array with shape (13 on 1600)
     for i in range(n_features):
-        col = X[:, i]
-        mean = dslr.mean(col[~np.isnan(col)])
-        std = dslr.std(col[~np.isnan(col)])
-
+        col = features[:, i]  # all rows of specific (i) feature
+        mean = dslr.mean(col)
+        std = dslr.std(col)
         if std == 0:
             fitted[:, i] = 0
         else:
             fitted[:, i] = (col - mean) / std
-
     return fitted
 
 

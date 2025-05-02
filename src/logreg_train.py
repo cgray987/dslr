@@ -11,7 +11,7 @@ def parse_args():
     """Handle command line argument parsing"""
     parser = argparse.ArgumentParser(
         description='Create predicted weights to classify'
-        'students scores into appropriate houses',
+        ' students scores into appropriate houses',
         formatter_class=argparse.RawTextHelpFormatter
     )
     parser.add_argument('dataset', type=str,
@@ -20,7 +20,7 @@ def parse_args():
                         help='display a confusion matrix from test data')
     parser.add_argument('-s', '--stochastic', action='store_true',
                         help='Use stochastic gradient descent to'
-                        'create training weights')
+                        ' create training weights')
     args = parser.parse_args()
 
     df = pandas.read_csv(args.dataset)
@@ -113,8 +113,8 @@ def one_vs_all(x, y, n_iterations=100, learning_rate=0.1, stochastic=False):
                 prob = log_reg.sigmoid(guess)
 
                 error = prob - y_bin
-                weight_grad = (1 / n_values) * np.dot(x.T, error)
-                bias_grad = (1 / n_values) * np.sum(error)
+                weight_grad = np.dot(x.T, error) / n_values
+                bias_grad = np.sum(error) / n_values
 
                 weights_per_class -= learning_rate * weight_grad
                 bias_per_class -= learning_rate * bias_grad
@@ -127,9 +127,9 @@ def one_vs_all(x, y, n_iterations=100, learning_rate=0.1, stochastic=False):
 
 
 def main():
-    df, args = parse_args()
-
     try:
+        df, args = parse_args()
+
         x = df.iloc[:, 6:]
         y = df['Hogwarts House'].to_numpy()
 

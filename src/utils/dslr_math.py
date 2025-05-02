@@ -25,15 +25,20 @@ def mean(arr):
     n = count(arr)
     if n == 0:
         return np.nan
-    return sum(arr) / len(arr)
+    return sum(arr) / n
 
 
 def variance(arr):
     """variance of given array-like"""
     avg = mean(arr)
-    if (len(arr) == 0):
-        return 0
-    return sum([(x - avg) ** 2 for x in arr]) / len(arr)
+    n = count(arr)
+    if n <= 1:
+        return np.nan
+    sum_squared = 0
+    for x in arr:
+        if not np.isnan(x):
+            sum_squared += (x - avg) ** 2
+    return sum_squared / (n - 1)
 
 
 def std(arr):
