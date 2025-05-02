@@ -21,6 +21,9 @@ def parse_args():
     parser.add_argument('-s', '--stochastic', action='store_true',
                         help='Use stochastic gradient descent to'
                         ' create training weights')
+    parser.add_argument('-n', '--normalization', action='store_true',
+                        help='Use normalization rather than standardization'
+                        'for fitting algorithm')
     args = parser.parse_args()
 
     df = pandas.read_csv(args.dataset)
@@ -82,7 +85,7 @@ def stochastic_gd(x, y, learning_rate=.1, epochs=25, batches=1):
     return weights, bias
 
 
-def one_vs_all(x, y, n_iterations=100, learning_rate=0.1, stochastic=False):
+def one_vs_all(x, y, n_iterations=100, learning_rate=0.5, stochastic=False):
     """ create weights for probability that student will be sorted
     into one house, vs being sorted into any of the others """
 
@@ -135,7 +138,10 @@ def main():
 
         # fill nan values with mean of dataset, maybe should be mean of column
         x = x.fillna(x.mean()).to_numpy()
-        x = log_reg.fitter(x)  # standard scaling -- all values normed to 0-1
+        if args.normalization:
+            x = log_reg.fitter(x)
+        else:
+            x = log_reg.fitter_standardization(x)
 
         weights, bias = one_vs_all(x, y, stochastic=args.stochastic)
         with open('datasets/weights.csv', 'w', ) as file:

@@ -16,6 +16,9 @@ def parse_args():
                         help='path to test dataset CSV file')
     parser.add_argument('weights', type=str,
                         help='path to training weights file')
+    parser.add_argument('-n', '--normalization', action='store_true',
+                        help='Use normalization rather than standardization'
+                        'for fitting algorithm')
 
     args = parser.parse_args()
 
@@ -37,7 +40,10 @@ def main():
 
         x_test = test_df.iloc[:, 6:]
         x_test = x_test.fillna(x_test.mean()).to_numpy()
-        x_test = log_reg.fitter(x_test)
+        if args.normalization:
+            x_test = log_reg.fitter(x_test)
+        else:
+            x_test = log_reg.fitter_standardization(x_test)
 
         weights = np.loadtxt(args.weights, skiprows=1, max_rows=4)
         bias = np.loadtxt(args.weights, skiprows=6)

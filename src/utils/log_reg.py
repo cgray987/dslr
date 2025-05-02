@@ -2,6 +2,18 @@ import numpy as np
 import utils.dslr_math as dslr
 
 
+def fitter_standardization(features):
+    n_features = features.shape[1]  # 13
+    fitted = np.zeros_like(features)  # output array with shape (13 on 1600)
+    for i in range(n_features):
+        col = features[:, i]
+        max = dslr.max(col[~np.isnan(col)])
+        min = dslr.min(col[~np.isnan(col)])
+        norm = (col - min) / (max - min)
+        fitted[:, i] = norm
+    return fitted
+
+
 def fitter(features):
     """Scales columns to unit variance
     mean becomes = 0, variance becomes = 1"""
