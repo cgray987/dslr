@@ -18,9 +18,9 @@ def parse_args():
                         help='path to training dataset CSV file')
     parser.add_argument('-c', '--confusion', action='store_true',
                         help='display a confusion matrix from test data')
-    parser.add_argument('-s', '--stochastic', action='store_true',
-                        help='Use stochastic gradient descent to'
-                        ' create training weights')
+    parser.add_argument('-o', '--optimizer', type=str,
+                        choices=['batch', 'stochastic'],
+                        default='batch', help='Choose optimization algorithm')
     parser.add_argument('-n', '--normalization', action='store_true',
                         help='Use normalization rather than standardization'
                         'for fitting algorithm')
@@ -46,6 +46,29 @@ def show_confusion(x, y, weights, bias):
     accuracy = np.sum(predictions == y) / len(y) * 100
     print(f"\nAccuracy: {accuracy:.3f}%")
     plot_confusion_matrix(conf_matrix)
+
+
+def batch_gd(x, y, learning_rate=0.5, n_iterations=100):
+    """Uses batch gradient descent to determine weights and bias"""
+    n_values, n_features = x.shape
+    weights = np.zeros(n_features)
+    bias = 0.0
+
+    for i in range(n_iterations):
+        # guess = weights*data + bias
+        guess = np.dot(x, weights) + bias
+        prob = log_reg.sigmoid(guess)
+
+        error = prob - y
+        weight_grad = np.dot(x.T, error) / n_values
+        bias_grad = np.sum(error) / n_values
+
+        weights -= learning_rate * weight_grad
+        bias -= learning_rate * bias_grad
+        if i % 10 == 0:
+            print(f"\tIteration {i}, Error: {sum(error):.4f}")
+
+    return weights, bias
 
 
 def stochastic_gd(x, y, learning_rate=.1, epochs=25, batches=1):
@@ -85,7 +108,7 @@ def stochastic_gd(x, y, learning_rate=.1, epochs=25, batches=1):
     return weights, bias
 
 
-def one_vs_all(x, y, n_iterations=100, learning_rate=0.5, stochastic=False):
+def one_vs_all(x, y, n_iterations=100, learning_rate=0.5, optimizer='batch'):
     """ create weights for probability that student will be sorted
     into one house, vs being sorted into any of the others """
 
@@ -99,33 +122,16 @@ def one_vs_all(x, y, n_iterations=100, learning_rate=0.5, stochastic=False):
     for i_x, current_house in enumerate(houses):
         # hufflepuff: [0, 1, 0, 0] etc
         y_bin = np.array([1 if label == current_house
-                          else 0 for label in y])  # [G, H, R, S]
-        weights_per_class = np.zeros(n_classes)
-        bias_per_class = 0
+                         else 0 for label in y])  # [G, H, R, S]
 
         print(f"{c.BOLD}{current_house}{c.RST}")
-        if stochastic:
+        if optimizer == 'stochastic':
             w, b = stochastic_gd(x, y_bin, learning_rate)
-            weights[i_x] = w
-            bias[i_x] = b
-        else:
-            # gradient descent (minimize error)
-            for i in range(n_iterations):
-                # guess = weights*data + bias
-                guess = np.dot(x, weights_per_class) + bias_per_class
-                prob = log_reg.sigmoid(guess)
+        else:  # batch
+            w, b = batch_gd(x, y_bin, learning_rate, n_iterations)
 
-                error = prob - y_bin
-                weight_grad = np.dot(x.T, error) / n_values
-                bias_grad = np.sum(error) / n_values
-
-                weights_per_class -= learning_rate * weight_grad
-                bias_per_class -= learning_rate * bias_grad
-                if i % 10 == 0:
-                    print(f"\tIteration {i}, Error: {sum(error):.4f}")
-
-            weights[i_x] = weights_per_class
-            bias[i_x] = bias_per_class
+        weights[i_x] = w
+        bias[i_x] = b
     return weights, bias
 
 
@@ -143,7 +149,7 @@ def main():
         else:
             x = log_reg.fitter_standardization(x)
 
-        weights, bias = one_vs_all(x, y, stochastic=args.stochastic)
+        weights, bias = one_vs_all(x, y, optimizer=args.optimizer)
         with open('datasets/weights.csv', 'w', ) as file:
             np.savetxt(file, weights, delimiter=' ',
                        fmt="%1.9f", header='weights')
