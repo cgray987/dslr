@@ -32,9 +32,9 @@ def predict(x, weights, bias):
 
 
 def main():
-    test_df, args = parse_args()
-
     try:
+        test_df, args = parse_args()
+
         x_test = test_df.iloc[:, 6:]
         x_test = x_test.fillna(x_test.mean()).to_numpy()
         x_test = log_reg.fitter(x_test)

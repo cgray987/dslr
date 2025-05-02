@@ -9,11 +9,11 @@ def describe(df):
     """Prints table of statistical calculations on given dataframe"""
     numeric_df = df.select_dtypes(include=[np.number])
 
-    print(f"{'':5}", end=" ")
+    print("     ", end=" ")
     for col in numeric_df.columns:
         print(f"|{c.BOLD}{col[0:12]:^12}{c.RST}", end=" ")
     # width of row above
-    width = 5 + sum(2 + 12 for _ in numeric_df.columns)
+    width = 5 + 14 * len(numeric_df.columns)
     print()
     print("-" * width)
 
