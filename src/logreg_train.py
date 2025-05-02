@@ -19,7 +19,7 @@ def parse_args():
     parser.add_argument('-c', '--confusion', action='store_true',
                         help='display a confusion matrix from test data')
     parser.add_argument('-o', '--optimizer', type=str,
-                        choices=['batch', 'stochastic'],
+                        choices=['batch', 'stochastic', 'minibatch'],
                         default='batch', help='Choose optimization algorithm')
     parser.add_argument('-n', '--normalization', action='store_true',
                         help='Use normalization rather than standardization'
@@ -108,6 +108,50 @@ def stochastic_gd(x, y, learning_rate=.1, epochs=25, batches=1):
     return weights, bias
 
 
+def minibatch_gd(x, y, learning_rate=0.3, n_iterations=50, batch_size=32):
+    """Uses mini-batch gradient descent to determine weights and bias"""
+    n_values, n_features = x.shape
+    weights = np.zeros(n_features)
+    bias = 0.0
+    n_batches = max(n_values // batch_size, 1)
+
+    for iteration in range(n_iterations):
+        indices = np.random.permutation(n_values)
+        x_shuffled = x[indices]
+        y_shuffled = y[indices]
+
+        iteration_loss = 0
+
+        for batch in range(n_batches):
+            start_idx = batch * batch_size
+            end_idx = min((batch + 1) * batch_size, n_values)
+
+            x_batch = x_shuffled[start_idx:end_idx]
+            y_batch = y_shuffled[start_idx:end_idx]
+
+            guess = np.dot(x_batch, weights) + bias
+            prob = log_reg.sigmoid(guess)
+
+            error = prob - y_batch
+            weight_grad = np.dot(x_batch.T, error) / (end_idx - start_idx)
+            bias_grad = np.sum(error) / (end_idx - start_idx)
+
+            weights -= learning_rate * weight_grad
+            bias -= learning_rate * bias_grad
+
+            pred = log_reg.sigmoid(np.dot(x_batch, weights) + bias)
+            batch_loss = -np.mean(y_batch * np.log(pred + 1e-15) +
+                                  (1 - y_batch) * np.log(1-pred + 1e-15))
+            iteration_loss += batch_loss
+
+        iteration_loss /= n_batches
+
+        if iteration % 10 == 0:
+            print(f"Iteration {iteration}, Loss: {iteration_loss:.4f}")
+
+    return weights, bias
+
+
 def one_vs_all(x, y, n_iterations=100, learning_rate=0.5, optimizer='batch'):
     """ create weights for probability that student will be sorted
     into one house, vs being sorted into any of the others """
@@ -127,6 +171,8 @@ def one_vs_all(x, y, n_iterations=100, learning_rate=0.5, optimizer='batch'):
         print(f"{c.BOLD}{current_house}{c.RST}")
         if optimizer == 'stochastic':
             w, b = stochastic_gd(x, y_bin, learning_rate)
+        elif optimizer == 'minibatch':
+            w, b = minibatch_gd(x, y_bin, learning_rate, n_iterations)
         else:  # batch
             w, b = batch_gd(x, y_bin, learning_rate, n_iterations)
 
