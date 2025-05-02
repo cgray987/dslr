@@ -25,7 +25,12 @@ def describe(df):
         '25%': lambda x: dslr_math.quantile(x, 25),
         '50%': lambda x: dslr_math.quantile(x, 50),
         '75%': lambda x: dslr_math.quantile(x, 75),
-        'Max': lambda x: dslr_math.max(x)
+        'Max': lambda x: dslr_math.max(x),
+        # bonus
+        'Var': lambda x: dslr_math.variance(x),
+        'Range': lambda x: dslr_math.max(x) - dslr_math.min(x),
+        'IQR': lambda x: dslr_math.quantile(x, 75) - dslr_math.quantile(x, 25),
+        'Skew': lambda x: dslr_math.skewness(x)
     }
     for stat_name, stat_func in stats.items():
         print(f"{c.BOLD}{stat_name:5}{c.RST}", end=" ")
