@@ -78,3 +78,22 @@ def quantile(arr, p):
     fraction = position - lower
     ret = arr[lower] * (1 - fraction) + arr[higher] * fraction
     return ret
+
+
+def skewness(arr):
+    """
+    Calculate the skewness of the data.
+    Skewness is a measure of assymmetry of the distribution
+    """
+    n = count(arr)
+    if n < 3:
+        return np.nan
+    m = mean(arr)
+    s = std(arr)
+    if s == 0:
+        return np.nan
+    skew = 0
+    for x in arr:
+        if not np.isnan(x):
+            skew += ((x - m) / s) ** 3
+    return (skew * n) / ((n - 1) * (n - 2))
