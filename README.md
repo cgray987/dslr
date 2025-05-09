@@ -45,6 +45,6 @@
         - **-n**, --normalization  Use normalization rather than standardization for fitting algorithm
 
 # references
-https://web.archive.org/web/20180618211933/http://cs229.stanford.edu/notes/cs229-notes1.pdf
-https://scikit-learn.org/stable/modules/sgd.html
-https://en.wikipedia.org/wiki/Logistic_regression
+- https://web.archive.org/web/20180618211933/http://cs229.stanford.edu/notes/cs229-notes1.pdf
+- https://scikit-learn.org/stable/modules/sgd.html
+- https://en.wikipedia.org/wiki/Logistic_regression
